@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"log"
+	"sort"
+	"strconv"
 )
-import "log"
 import "bufio"
 import "os"
 
@@ -15,40 +16,23 @@ func main() {
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
-	var (
-		a    []string
-		x, y string
-	)
+	lines := make(bySize, 0)
+	scanner.Scan()
+	n, err := strconv.Atoi(scanner.Text())
+	if err != nil {
+		log.Fatal(err)
+	}
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if len(line) == 0 {
-			continue
-		}
-		a = strings.Split(line, ";")
-		x = a[0]
-		y = a[1]
-		if len(x) > 50 || len(y) > 50 {
-			continue
-		}
-		if len(x) < len(y) {
-			fmt.Println(longest("", x, y))
-		} else {
-			fmt.Println(longest("", y, x))
-		}
+		lines = append(lines, scanner.Text())
+	}
+	sort.Sort(lines)
+	for i := 0; i < n; i++ {
+		fmt.Println(lines[i])
 	}
 }
 
-func longest(current, x, y string) string {
-	if len(x) == 0 || len(y) == 0 {
-		return current
-	}
-	if x[0] == y[0] {
-		return longest(current+string(x[0]), x[1:], y[1:])
-	}
-	a := longest(current, x[1:], y)
-	b := longest(current, y[1:], x)
-	if len(a) > len(b) {
-		return a
-	}
-	return b
-}
+type bySize []string
+
+func (a bySize) Len() int           { return len(a) }
+func (a bySize) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a bySize) Less(i, j int) bool { return len(a[i]) > len(a[j]) }
